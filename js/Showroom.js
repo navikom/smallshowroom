@@ -140,13 +140,16 @@ Showroom.prototype = {
 
             var pointLight = new THREE.PointLight(color, scope.options.lights.intensity, scope.options.lights.distance);
 
-            var geometry = new THREE.SphereGeometry(70, 12, 6);
+            var geometry = new THREE.CircleGeometry(115, 128);
             var material = new THREE.MeshBasicMaterial({color: 0xffffff});
             var sphere = new THREE.Mesh(geometry, material);
+            sphere.rotation.x = Math.PI / 2;
             pointLight.add(sphere);
 
             var lamp = scope.lamp.clone();
-            lamp.position.y = 50;
+            lamp.position.y = -10;
+            lamp.position.x = -24;
+
             pointLight.add(lamp);
 
             pointLight.position.copy(position);
