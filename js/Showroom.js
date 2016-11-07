@@ -52,45 +52,15 @@ Showroom.prototype = {
                     scope.requestRender();
                 });
 
-            if (scope.options.data[2])
-                loader.load(scope.options.data[2], function (result) {
-                    result.scale.set(0.7, 0.7, 0.7);
-                    scope.scene.add(result);
-                    scope.requestRender();
-                });
 
         });
-
-        function onProgress(progress) {
-
-            console.log('Loaded:', progress.loaded, ' total:', progress.total);
-        }
-
-        //if (scope.options.data[2] && scope.options.data[2].indexOf('.mtl') > -1) {
-        //    var mtlLoader = new THREE.MTLLoader();
-        //    mtlLoader.setTexturePath(this.options.texturePath);
-        //    mtlLoader.load(this.options.data[2], function (materials) {
-        //        materials.preload();
-        //        var objLoader = new THREE.OBJLoader();
-        //        objLoader.setMaterials(materials);
-        //        objLoader.load(scope.options.data[3], function (object) {
-        //            //object.scale.set(9, 9, 9);
-        //            //object.rotation.x = -Math.PI / 2;
-        //            scope.scene.add(object);
-        //
-        //            scope.requestRender();
-        //
-        //        }, onProgress);
-        //    });
-        //
-        //}
 
         this.setCollisionObjects();
 
         function removeTransparent(obj) {
             obj.traverse(function (child) {
                 if (child.material
-                    && ['A9995B5C-C85E-4FCC-AA29-E05A4AA7BB0D', '8FB3DF1D-C188-4390-B6E9-A5A0D7A75D67'].indexOf(child.material.uuid) > -1
+                    && ['1159E14C-9496-4D83-A669-1355E1E141EE'].indexOf(child.material.uuid) > -1
                     && child.material.transparent) {
                     child.material.transparent = false;
                     child.material.needsUpdate = true;
