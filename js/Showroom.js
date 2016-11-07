@@ -48,6 +48,7 @@ Showroom.prototype = {
             if (scope.options.data[1])
                 loader.load(scope.options.data[1], function (result) {
                     scope.lamp = result;
+                    scope.lamp.scale.set(3,3,3);
                     scope.initLights();
                     scope.requestRender();
                 });
@@ -60,7 +61,7 @@ Showroom.prototype = {
         function removeTransparent(obj) {
             obj.traverse(function (child) {
                 if (child.material
-                    && ['1159E14C-9496-4D83-A669-1355E1E141EE'].indexOf(child.material.uuid) > -1
+                    && ['1159E14C-9496-4D83-A669-1355E1E141EE', '8FB3DF1D-C188-4390-B6E9-A5A0D7A75D67'].indexOf(child.material.uuid) > -1
                     && child.material.transparent) {
                     child.material.transparent = false;
                     child.material.needsUpdate = true;
@@ -80,11 +81,11 @@ Showroom.prototype = {
 
     setCollisionObjects: function(){
         var scope = this;
-        this.carBody = new THREE.Mesh(new THREE.CubeGeometry(1700, 3000, 3900),
+        this.seat = new THREE.Mesh(new THREE.CubeGeometry(800, 2000, 700),
             new THREE.MeshBasicMaterial({color: 0xCC7407}));
-        this.carBody.position.y = 300;
-        this.carBody.visible = false;
-        this.scene.add(this.carBody);
+        this.seat.position.set(-1300, 300, -2900);
+        this.seat.visible = false;
+        this.scene.add(this.seat);
 
         createWall(
             this.options.borders.x * 2,
@@ -170,7 +171,7 @@ Showroom.prototype = {
 
         this.controls = new THREE.PointerLockControls(
             this.camera,
-            new THREE.Vector3(-2000, this.options.userHeight, -2000));
+            new THREE.Vector3(-1300, this.options.userHeight, 0));
         this.scene.add(this.controls.getObject());
 
         if(this.options.pointerlock){
@@ -599,7 +600,7 @@ Showroom.prototype = {
                 }
             }
 
-            collisions = caster.intersectObjects([scope.carBody]);
+            collisions = caster.intersectObjects([scope.seat]);
 
             if(collisions.length > 0 && collisions[0].distance < distance){
                 return false;
