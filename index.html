@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Showroom</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="js/three.min.js"></script>
+    <script src="js/PointerLockControls.js"></script>
+    <script src="js/helpers.js"></script>
+    <script src="js/Showroom.js"></script>
+
+    <style>
+
+        #instructions {
+
+            position: absolute;
+            width: 30%;
+            height: 15%;
+            right: 10px;
+            bottom: 10px;
+
+            display: -webkit-box;
+            display: -moz-box;
+            display: box;
+
+            -webkit-box-orient: horizontal;
+            -moz-box-orient: horizontal;
+            box-orient: horizontal;
+
+            -webkit-box-pack: center;
+            -moz-box-pack: center;
+            box-pack: center;
+
+            -webkit-box-align: center;
+            -moz-box-align: center;
+            box-align: center;
+
+            color: #000000;
+            text-align: center;
+
+            opacity: 0.7;
+
+        }
+
+        #container {
+            width:800px;
+            margin:auto;
+        }
+
+        #showroom {
+            width:800px;
+            height:600px;
+        }
+        #forward {
+            position: absolute;
+            left: 15px;
+            bottom: 15px;
+            height: 35px;
+            display: none;
+            background-color: #fff8dc;
+        }
+        #backward {
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
+            height: 35px;
+            display: none;
+            background-color: #fff8dc;
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="container">
+    <div id="showroom"></div>
+    <div id="blocker">
+        <div id="instructions">
+            <!-- <span style="font-size:40px">Controls</span>
+            <br />
+            <span id="instructionsText">(SPACE = on/off, W, A, S, D, Up, Left, Right, Down = Move, MOUSE = Look around)</span> -->
+        </div>
+    </div>
+    <button id="forward">forward</button>
+    <button id="backward">backward</button>
+</div>
+
+<script>
+
+    new Showroom({
+        container: document.getElementById('showroom'),
+        data: [],
+        texturePath: 'textures/',
+        carTexturePath: 'textures/volvo/',
+        pointerlock: false,
+        speed: 9000,
+        userHeight: 1000,
+        borders: {x: 4000, z: 4400},
+        lights: {intensity: .7, distance: 12000, height: 3900, width:2000},
+        buttons: {forward: document.getElementById('forward'), backward: document.getElementById('backward')}
+    })
+
+</script>
+
+</body>
+</html>
