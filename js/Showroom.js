@@ -287,7 +287,6 @@ Showroom.prototype = {
             scope.move.forward = true;
             scope.controlsEnabled = true;
             scope.controls.enabled = true;
-            forward.style.backgroundColor = 'blue';
             forward.addEventListener( 'touchend', onTouchEndForward, false );
 
         }
@@ -296,7 +295,6 @@ Showroom.prototype = {
             scope.move.forward = false;
             scope.controlsEnabled = false;
             scope.controls.enabled = false;
-            forward.style.backgroundColor = '#fff8dc';
             forward.removeEventListener( 'touchend', onTouchEndForward, false );
 
         }
@@ -306,7 +304,6 @@ Showroom.prototype = {
             scope.move.backward = true;
             scope.controlsEnabled = true;
             scope.controls.enabled = true;
-            backward.style.backgroundColor = 'blue';
             backward.addEventListener( 'touchend', onTouchEndBackward, false );
 
         }
@@ -315,7 +312,6 @@ Showroom.prototype = {
             scope.move.backward = false;
             scope.controlsEnabled = false;
             scope.controls.enabled = false;
-            backward.style.backgroundColor = '#fff8dc';
             backward.removeEventListener( 'touchend', onTouchEndBackward, false );
 
         }

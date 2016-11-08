@@ -15,22 +15,34 @@ THREE.PointerLockControls = function ( camera, position ) {
 	var yawObject = new THREE.Object3D();
 	yawObject.position.copy(position);
 	yawObject.add( pitchObject );
-	//yawObject.rotation.y = -Math.PI;
+	yawObject.rotation.y = -Math.PI;
 
 	var PI_2 = Math.PI / 2;
 	var lastPt = null;
+	var changeEvent = new Event('change');
 
 	var onMouseMove = function ( event ) {
+
 
 		if ( scope.enabled === false ) return;
 
 		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
+		if(navigator.userAgent.match(/Safari/i) && lastPt != null){
+			movementX = event.pageX - lastPt.x;
+			movementY = event.pageY - lastPt.y;
+		}
+
 		yawObject.rotation.y += movementX * 0.002;
 		pitchObject.rotation.x += movementY * 0.002;
 
 		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+
+		camera.dispatchEvent( changeEvent );
+
+		lastPt = {x: event.pageX, y: event.pageY};
+		
 	};
 
 
@@ -49,11 +61,13 @@ THREE.PointerLockControls = function ( camera, position ) {
 			pitchObject.rotation.x += movementY * 0.002;
 			pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 		}
+
+		camera.dispatchEvent( changeEvent );
 		lastPt = {x: event.touches[0].pageX, y: event.touches[0].pageY};
 
 	};
 
-	var onTouchEnd = function ( event ) {
+	var onEnd = function ( event ) {
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -68,8 +82,9 @@ THREE.PointerLockControls = function ( camera, position ) {
 	};
 
 	document.addEventListener( 'mousemove', onMouseMove, false );
+	document.addEventListener( 'mouseup', onEnd, false );
 	document.addEventListener( 'touchmove', onTouchMove, false );
-	document.addEventListener( 'touchend', onTouchEnd, false);
+	document.addEventListener( 'touchend', onEnd, false);
 
 	this.enabled = false;
 
