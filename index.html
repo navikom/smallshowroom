@@ -11,6 +11,9 @@
 
     <style>
 
+        p {
+            margin: 5px;
+        }
         #instructions {
 
             position: absolute;
@@ -63,6 +66,57 @@
             bottom: 15px;
             display: none;
         }
+        #annotation {
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
+            color: #FFF;
+            opacity: 0;
+            max-width: 600px;
+            padding: 7px;
+            position: absolute;
+            -webkit-animation-duration: 1s;
+            z-index: -999;
+        }
+        #annotationTitle {
+            margin-left: 30px;
+        }
+
+        #annotationClose {
+            position: absolute;
+            right: 10px;
+            top: 10px
+        }
+        .annotation-wrapper {
+            position: relative;
+            background: rgba(255, 253, 244, 0.8);
+            border-radius: 6px;
+            color: #3d3d3d;
+            padding: 7px;
+            overflow: hidden;
+            word-wrap:break-word;
+            height: 90%;
+            float:left;
+        }
+        #annotationContent{
+            font-size: 18px;
+            overflow-y: auto;
+        }
+        @-webkit-keyframes show{
+            from {
+                -webkit-transform: scale(0);
+            }
+            to {
+                -webkit-transform: scale(1);
+            }
+        }
+        @-webkit-keyframes hide{
+            from {
+                -webkit-transform: scale(1);
+            }
+            to {
+                -webkit-transform: scale(0);
+            }
+        }
     </style>
 
 </head>
@@ -70,6 +124,13 @@
 
 <div id="container">
     <div id="showroom"></div>
+    <div id="annotation">
+        <div class="annotation-wrapper">
+            <h1 id="annotationTitle"></h1>
+            <div id="annotationContent"></div>
+            <img src="error.svg" id="annotationClose" width="20px"/>
+        </div>
+    </div>
     <div id="blocker">
         <div id="instructions">
             <!-- <span style="font-size:40px">Controls</span>
@@ -83,7 +144,7 @@
 
 <script>
 
-    new Showroom({
+    var showroom = new Showroom({
         container: document.getElementById('showroom'),
         data: ['room.json', 'lamp.json'],
         texturePath: 'textures/',
@@ -92,7 +153,19 @@
         userHeight: 1000,
         borders: {x: 3800, z: 3500},
         lights: {intensity: .7, distance: 12000, height: 3400, width:1800},
-        buttons: {forward: document.getElementById('forward'), backward: document.getElementById('backward')}
+        buttons: {forward: document.getElementById('forward'), backward: document.getElementById('backward')},
+        annotation: {
+            wrapper: document.getElementById('annotation'),
+            title: document.getElementById('annotationTitle'),
+            content: document.getElementById('annotationContent')
+        }
+    });
+
+    var close = document.getElementById('annotationClose');
+    close.addEventListener('click', function(){
+        showroom.options.annotation.wrapper.style.opacity = 0;
+        showroom.options.annotation.wrapper.style.animationName = "hide";
+        showroom.options.annotation.wrapper.style.zIndex = -999;
     })
 
 </script>

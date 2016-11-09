@@ -453,6 +453,8 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
                             applyToggle( obj, object.uuid + i );
                         } else if ( animations[ i ].event === 'reset' ) {
                             applyReset( obj, object.uuid + i );
+                        } else if ( animations[ i ].event === 'data' ) {
+                            applyData( obj, object.uuid + i );
                         } else
                             applyClickAnimation( obj, object.uuid + i );
 
@@ -492,15 +494,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
             var obj = mainScene.getObjectByProperty( 'name', objName, true );
 
-            if ( !obj ) {
-
-                for ( var i = 0, j = interfaces.length; i < j; i++ ) {
-                    obj = interfaces[ i ].scene.getObjectByProperty( 'name', objName, true );
-                    if ( obj != undefined )
-                        break;
-                }
-
-            }
             objects.push( obj );
 
         } )
@@ -697,6 +690,68 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
     function applyToggle ( object, uuid ) {
 
         object.userData.animations.disabled = object.userData.click[ uuid ].disabled;
+    }
+
+    function applyData( object, uuid ){
+
+        var data = object.userData.click[ uuid].data;
+        var annot = viewer.options.annotation;
+        var rect = container.getBoundingClientRect();
+
+        if(annot.title)
+            annot.title.innerHTML = data.title;
+
+        if(!annot.ul){
+            var ul = document.createElement('ul');
+            annot.content.appendChild(ul);
+            annot.ul = ul;
+        }
+
+        var fc = annot.ul.firstChild;
+
+        while( fc ) {
+            annot.ul.removeChild( fc );
+            fc = annot.ul.firstChild;
+        }
+
+        if(!annot.cache){
+            annot.cache = {};
+        }
+
+        for (var key in data.content){
+            if(!annot.cache[key]){
+                var li = document.createElement('li');
+                var p = document.createElement('p');
+                p.innerHTML = key;
+                li.appendChild(p);
+                if(data.content[key].length > 0){
+                    for (var i = 0; i < data.content[key].length; i++){
+                        var text = data.content[key][i];
+                        var p = document.createElement('p');
+                        p.innerHTML = text;
+                        li.appendChild(p);
+                    }
+                }
+                annot.cache[key] = li;
+            }
+
+            annot.ul.appendChild(annot.cache[key]);
+
+        }
+
+
+        var windowHeight = Math.min(window.innerHeight, rect.height);
+        var height = Math.min(annot.wrapper.offsetHeight, windowHeight);
+
+        var width = rect.width * 0.7;
+        var top = rect.top + (windowHeight - height) / 2;
+        annot.wrapper.style.top = Math.max(5, top) + 'px';
+        annot.wrapper.style.left = (rect.left + (rect.width - width) / 2)  + 'px';
+        annot.wrapper.style.maxWidth = width + 'px';
+        annot.wrapper.style.zIndex = 999;
+        annot.wrapper.style.opacity = 1;
+        annot.wrapper.style.animationName = "show";
+
     }
 
     function applyReset ( object, uuid ) {
