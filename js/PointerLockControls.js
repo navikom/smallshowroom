@@ -10,16 +10,15 @@ THREE.PointerLockControls = function ( camera, position ) {
 
 	var pitchObject = new THREE.Object3D();
 	pitchObject.add( camera );
-	pitchObject.rotation.x = -0.24;
+	pitchObject.rotation.x = -0.1;
 
 	var yawObject = new THREE.Object3D();
 	yawObject.position.copy(position);
 	yawObject.add( pitchObject );
-	yawObject.rotation.y = -0.2;
+	yawObject.rotation.y = -0.55;
 
 	var PI_2 = Math.PI / 2;
 	var lastPt = null;
-	var changeEvent = new Event('change');
 
 	var onMouseMove = function ( event ) {
 
@@ -38,8 +37,6 @@ THREE.PointerLockControls = function ( camera, position ) {
 		pitchObject.rotation.x += movementY * 0.002;
 
 		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
-
-		camera.dispatchEvent( changeEvent );
 
 		lastPt = {x: event.pageX, y: event.pageY};
 		
@@ -61,8 +58,6 @@ THREE.PointerLockControls = function ( camera, position ) {
 			pitchObject.rotation.x += movementY * 0.002;
 			pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 		}
-
-		camera.dispatchEvent( changeEvent );
 		lastPt = {x: event.touches[0].pageX, y: event.touches[0].pageY};
 
 	};

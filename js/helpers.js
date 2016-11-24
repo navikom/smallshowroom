@@ -25,6 +25,33 @@ function extend ( obj ) {
     return obj;
 }
 
+var _eventHandlers = {};
+
+function addListener ( node, event, handler, capture ) {
+    if ( !(node in _eventHandlers) ) {
+        _eventHandlers[ node ] = {};
+    }
+    if ( !(event in _eventHandlers[ node ]) ) {
+        _eventHandlers[ node ][ event ] = [];
+    }
+
+    _eventHandlers[ node ][ event ].push( [ handler, capture ] );
+    node.addEventListener( event, handler, capture );
+}
+
+function removeAllListeners ( node, event ) {
+    if ( node in _eventHandlers ) {
+        var handlers = _eventHandlers[ node ];
+        if ( event in handlers ) {
+            var eventHandlers = handlers[ event ];
+            for ( var i = eventHandlers.length; i--; ) {
+                var handler = eventHandlers[ i ];
+                node.removeEventListener( event, handler[ 0 ], handler[ 1 ] );
+            }
+        }
+    }
+}
+
 function isMobile() {
     if( navigator.userAgent.match(/Android/i)
         || navigator.userAgent.match(/webOS/i)
@@ -159,34 +186,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
     viewer.objectsLookAtCamera = objectsLookAtCamera;
 
-
-    var _eventHandlers = {};
-
-    function addListener ( node, event, handler, capture ) {
-        if ( !(node in _eventHandlers) ) {
-            _eventHandlers[ node ] = {};
-        }
-        if ( !(event in _eventHandlers[ node ]) ) {
-            _eventHandlers[ node ][ event ] = [];
-        }
-
-        _eventHandlers[ node ][ event ].push( [ handler, capture ] );
-        node.addEventListener( event, handler, capture );
-    }
-
-    function removeAllListeners ( node, event ) {
-        if ( node in _eventHandlers ) {
-            var handlers = _eventHandlers[ node ];
-            if ( event in handlers ) {
-                var eventHandlers = handlers[ event ];
-                for ( var i = eventHandlers.length; i--; ) {
-                    var handler = eventHandlers[ i ];
-                    node.removeEventListener( event, handler[ 0 ], handler[ 1 ] );
-                }
-            }
-        }
-    }
-
     traverse( mainScene, mainObjects );
 
 
@@ -295,21 +294,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
     }
 
-
-    function onControlsChanged () {
-
-        if ( objectsLookAtCamera.length == 0 ) return;
-
-        for ( var i = 0; i < objectsLookAtCamera.length; i++ ) {
-
-            if ( objectsLookAtCamera[ i ].lookAtCamera )
-                objectsLookAtCamera[ i ].lookAt( mainCamera.position );
-
-        }
-
-    }
-
-
     // events
 
     function onClick ( frame, event ) {
@@ -321,7 +305,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
 
     }
-
 
     function onTouchEnd ( frame, event ) {
 
@@ -348,8 +331,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
     addListener( container, 'click', onClick.bind( this, frame ), false );
     addListener( container, 'touchstart', onTouchEnd.bind( this, frame ), false );
     addListener( container, 'mousemove', onMouseMove.bind( this, frame ), false );
-
-
 
     function checkAvailabilityGroups ( object, scene ) {
 
@@ -739,15 +720,17 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
         }
 
-
         var windowHeight = Math.min(window.innerHeight, rect.height);
         var height = Math.min(annot.wrapper.offsetHeight, windowHeight);
 
         var width = rect.width * 0.7;
+        annot.wrapper.style.maxWidth = width + 'px';
         var top = rect.top + (windowHeight - height) / 2;
         annot.wrapper.style.top = Math.max(5, top) + 'px';
-        annot.wrapper.style.left = (rect.left + (rect.width - width) / 2)  + 'px';
-        annot.wrapper.style.maxWidth = width + 'px';
+
+        var offset = (rect.width - Math.min(width, annot.wrapper.offsetWidth)) / 2;
+        annot.wrapper.style.left = offset  + 'px';
+
         annot.wrapper.style.zIndex = 999;
         annot.wrapper.style.opacity = 1;
         annot.wrapper.style.animationName = "show";

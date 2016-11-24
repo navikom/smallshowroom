@@ -4,7 +4,8 @@
     <title>Showroom</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <script src="js/three.min.js"></script>
+    <link rel="stylesheet" id="css-bootstrap" href="fonts/style.css">
+    <script src="js/three.js"></script>
     <script src="js/PointerLockControls.js"></script>
     <script src="js/helpers.js"></script>
     <script src="js/Showroom.js"></script>
@@ -48,24 +49,48 @@
         #container {
             width:800px;
             margin:auto;
+            position: relative;
         }
 
         #showroom {
             width:800px;
             height:600px;
         }
-        #forward {
+        .buttons {
             position: absolute;
-            left: 15px;
             bottom: 15px;
-            display: none;
+            width: 215px;
+            right: 0;
+
         }
-        #backward {
-            position: absolute;
-            right: 15px;
-            bottom: 15px;
-            display: none;
+        .arrow-btn {
+            float: left;
+            width: 40px;
+            height: 40px;
+            padding: 10px 3px 0 10px;
+            margin-left: 5px;
+            color: #484848;
+            font-size: 34px;
+            border: solid 4px #484848;
         }
+
+        .up {
+            margin: 0 70px 5px;
+        }
+
+        .selected {
+            box-shadow: 1px 1px 10px rgba(44, 161, 44, 0.2);
+            background: rgba(44, 161, 44, 0.4);
+            color: #268c26;
+            border-color: #268c26;
+        }
+
+        .arrow-btn:hover {
+            color: #2ca12c;
+            border-color: #2CA12C;
+            cursor: pointer;
+        }
+
         #annotation {
             background: rgba(0, 0, 0, 0.8);
             box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
@@ -138,8 +163,21 @@
             <span id="instructionsText">(SPACE = on/off, W, A, S, D, Up, Left, Right, Down = Move, MOUSE = Look around)</span> -->
         </div>
     </div>
-    <img src="plus.svg" id="forward" width="80px"/>
-    <img src="minus.svg" id="backward" width="80px"/>
+    <div class="buttons">
+        <div id="forward" class="arrow-btn up">
+            <i class="icon-arrow-up"></i>
+        </div>
+        <div id="left" class="arrow-btn">
+            <i class="icon-arrow-left"></i>
+        </div>
+        <div id="backward" class="arrow-btn">
+            <i class="icon-arrow-down"></i>
+        </div>
+        <div id="right" class="arrow-btn">
+            <i class="icon-arrow-right"></i>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -153,7 +191,12 @@
         userHeight: 1000,
         borders: {x: 3800, z: 3500},
         lights: {intensity: .7, distance: 12000, height: 3400, width:1800},
-        buttons: {forward: document.getElementById('forward'), backward: document.getElementById('backward')},
+        buttons: {
+            forward: document.getElementById('forward'),
+            backward: document.getElementById('backward'),
+            left: document.getElementById('left'),
+            right: document.getElementById('right')
+        },
         annotation: {
             wrapper: document.getElementById('annotation'),
             title: document.getElementById('annotationTitle'),
@@ -162,11 +205,15 @@
     });
 
     var close = document.getElementById('annotationClose');
-    close.addEventListener('click', function(){
+    close.addEventListener('click', clickEvent, false);
+
+    close.addEventListener( 'touchstart', clickEvent, false);
+
+    function clickEvent(){
         showroom.options.annotation.wrapper.style.opacity = 0;
         showroom.options.annotation.wrapper.style.animationName = "hide";
         showroom.options.annotation.wrapper.style.zIndex = -999;
-    })
+    }
 
 </script>
 

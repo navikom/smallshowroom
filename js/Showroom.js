@@ -50,9 +50,9 @@ Showroom.prototype = {
                     scope.lamp = result;
                     scope.lamp.scale.set(3,3,3);
                     scope.initLights();
+                    addWire();
                     scope.requestRender();
                 });
-
 
         });
 
@@ -75,6 +75,12 @@ Showroom.prototype = {
                     scope.objects.push(child);
                 }
             });
+        }
+
+        function addWire(){
+            var wire = new THREE.GridHelper(4400, 100, 0x888888, 0x888888);
+            wire.material.linewidth = 1.5;
+            scope.scene.add( wire );
         }
 
     },
@@ -174,8 +180,10 @@ Showroom.prototype = {
 
         this.controls = new THREE.PointerLockControls(
             this.camera,
-            new THREE.Vector3(-1300, this.options.userHeight, 0));
+            new THREE.Vector3(-3000, this.options.userHeight, 2300));
         this.scene.add(this.controls.getObject());
+
+
 
         if(this.options.pointerlock){
             this.pointerLockControls();
@@ -184,7 +192,7 @@ Showroom.prototype = {
         }
 
         var onKeyDown = function (event) {
-
+            if( scope.hasMovement()) return;
             switch (event.keyCode) {
 
                 case scope.keys.UP:
@@ -196,11 +204,9 @@ Showroom.prototype = {
 
                 case scope.keys.LEFT:
                 case scope.keys.A:
-                    if(scope.options.pointerlock){
-                        scope.move.left = true;
-                        scope.controlsEnabled = true;
-                        scope.controls.enabled = true;
-                    }
+                    scope.move.left = true;
+                    scope.controlsEnabled = true;
+                    scope.controls.enabled = true;
 
                     break;
                 case scope.keys.DOWN:
@@ -212,11 +218,9 @@ Showroom.prototype = {
 
                 case scope.keys.RIGHT:
                 case scope.keys.D:
-                    if(scope.options.pointerlock){
-                        scope.move.right = true;
-                        scope.controlsEnabled = true;
-                        scope.controls.enabled = true;
-                    }
+                    scope.move.right = true;
+                    scope.controlsEnabled = true;
+                    scope.controls.enabled = true;
 
                     break;
 
@@ -226,6 +230,7 @@ Showroom.prototype = {
                     break;
 
             }
+            scope.selectButton();
 
         };
 
@@ -262,16 +267,38 @@ Showroom.prototype = {
                     break;
 
             }
-
+            scope.selectButton();
         };
 
         document.addEventListener('keydown', onKeyDown, false);
         document.addEventListener('keyup', onKeyUp, false);
 
-        if( isMobile()){
-            this.buttonControls();
-        }
+        this.buttonControls();
 
+    },
+
+    hasMovement: function(){
+        var scope = this;
+        var has = false;
+        ['forward', 'backward', 'left', 'right'].map(function(name){
+            if(scope.move[name]){
+                has = true;
+                return false;
+            }
+        });
+
+        return has;
+    },
+
+    selectButton: function( ){
+        var scope = this;
+        ['forward', 'backward', 'left', 'right'].map(function(name){
+            if(scope.move[name]){
+                scope.options.buttons[name].classList.add( 'selected' );
+            } else {
+                scope.options.buttons[name].classList.remove( 'selected');
+            }
+        });
     },
 
     buttonControls: function(){
@@ -279,46 +306,40 @@ Showroom.prototype = {
         var scope = this;
         var forward = this.options.buttons.forward;
         var backward = this.options.buttons.backward;
-        forward.style.display = 'block';
-        backward.style.display = 'block';
+        var left = this.options.buttons.left;
+        var right = this.options.buttons.right;
 
-        function onTouchStartForward( event ) {
-            if(scope.move.backward) return;
-            scope.move.forward = true;
+        function onStart( object, endEventName ){
+            var key = object.key;
+            if( scope.hasMovement()) return;
+            scope.move[key] = true;
             scope.controlsEnabled = true;
             scope.controls.enabled = true;
-            forward.addEventListener( 'touchend', onTouchEndForward, false );
-
+            scope.selectButton();
+            object.elem.addEventListener( endEventName, onEnd.bind( this, object, endEventName), false );
         }
 
-        function onTouchEndForward( event ) {
-            scope.move.forward = false;
+        function onEnd( object, endEventName ){
+            scope.move[object.key] = false;
             scope.controlsEnabled = false;
             scope.controls.enabled = false;
-            forward.removeEventListener( 'touchend', onTouchEndForward, false );
-
+            scope.selectButton();
+            object.elem.removeEventListener( endEventName, onEnd.bind( this, object, endEventName), false );
         }
 
-        function onTouchStartBackward( event ) {
-            if(scope.move.forward) return;
-            scope.move.backward = true;
-            scope.controlsEnabled = true;
-            scope.controls.enabled = true;
-            backward.addEventListener( 'touchend', onTouchEndBackward, false );
 
-        }
+        [{elem: forward, key: 'forward'}, {elem: backward, key: 'backward'}, {elem: left, key: 'left'}, {elem: right, key: 'right'}]
+            .map(function(object){
+                if(isMobile()){
+                    addListener( object.elem, 'touchstart', onStart.bind( this, object, 'touchend' ), false );
+                } else {
+                    addListener( object.elem, 'mousedown', onStart.bind( this, object, 'mouseup' ), false );
+                }
 
-        function onTouchEndBackward( event ) {
-            scope.move.backward = false;
-            scope.controlsEnabled = false;
-            scope.controls.enabled = false;
-            backward.removeEventListener( 'touchend', onTouchEndBackward, false );
+            });
 
-        }
-
-        forward.addEventListener( 'touchstart', onTouchStartForward, false );
-        backward.addEventListener( 'touchstart', onTouchStartBackward, false );
     },
+
 
     mouseControls: function(){
         var scope = this;
@@ -416,6 +437,9 @@ Showroom.prototype = {
     },
 
     updateAspect: function () {
+        var wrapper = document.getElementById('container');
+        this.container.style.maxWidth = wrapper.style.maxWidth = Math.min(this.container.clientWidth, window.innerWidth) + 'px';
+        this.container.style.maxHeight = wrapper.style.maxHeight = Math.min(this.container.clientHeight, window.innerHeight) + 'px';
         this.aspect = {
             width: this.container.clientWidth,
             height: this.container.clientHeight
@@ -440,7 +464,7 @@ Showroom.prototype = {
         this.container.appendChild(this.renderer.domElement);
 
         this.updateCameraAspect();
-
+        this.render();
     },
 
     start: function () {
