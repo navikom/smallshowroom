@@ -87,9 +87,9 @@ Showroom.prototype = {
 
     setCollisionObjects: function(){
         var scope = this;
-        this.seat = new THREE.Mesh(new THREE.CubeGeometry(800, 2000, 700),
+        this.seat = new THREE.Mesh(new THREE.CubeGeometry(1300, 3000, 850),
             new THREE.MeshBasicMaterial({color: 0xCC7407}));
-        this.seat.position.set(-1300, 300, -2900);
+        this.seat.position.set(0, 300, 0);
         this.seat.visible = false;
         this.scene.add(this.seat);
 
@@ -180,7 +180,7 @@ Showroom.prototype = {
 
         this.controls = new THREE.PointerLockControls(
             this.camera,
-            new THREE.Vector3(-3000, this.options.userHeight, 2300));
+            new THREE.Vector3(-3500, this.options.userHeight, 3400));
         this.scene.add(this.controls.getObject());
 
 
