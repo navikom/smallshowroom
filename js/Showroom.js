@@ -582,7 +582,7 @@ Showroom.prototype = {
                 this.velocity.x -= this.options.speed * delta;
                 moveAction = true;
             }
-            if (this.move.right && inBorders(new THREE.Vector3(0, 0, 1), this.velocity.x + this.options.speed * delta)) {
+            if (this.move.right && inBorders(new THREE.Vector3(1, 0, 0), this.velocity.x + this.options.speed * delta)) {
                 this.velocity.x += this.options.speed * delta;
                 moveAction = true;
             }
