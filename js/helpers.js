@@ -678,6 +678,7 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
         var data = object.userData.click[ uuid].data;
         var annot = viewer.options.annotation;
         var rect = container.getBoundingClientRect();
+        var ul = annot.content.children[0];
 
         if(annot.title)
             annot.title.innerHTML = data.title;
@@ -720,12 +721,16 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
         }
 
+
         var windowHeight = Math.min(window.innerHeight, rect.height);
-        var height = Math.min(annot.wrapper.offsetHeight, windowHeight);
+        var height = windowHeight;
 
         var width = rect.width * 0.7;
         annot.wrapper.style.maxWidth = width + 'px';
-        var top = rect.top + (windowHeight - height) / 2;
+        ul.style.maxHeight = (height - 200 - rect.top) + 'px';
+
+        var top = rect.top + (windowHeight - annot.wrapper.offsetHeight) / 2;
+        console.log(height, rect.top)
         annot.wrapper.style.top = Math.max(5, top) + 'px';
 
         var offset = (rect.width - Math.min(width, annot.wrapper.offsetWidth)) / 2;

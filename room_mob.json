@@ -174,12 +174,6 @@
 			"specular": 1118481,
 			"shininess": 30,
 			"map": "445CBA3A-65B1-4276-9B34-F818384E42E0",
-			"alphaMap": "711BBF6F-FE66-4E63-A732-FFB0F808FFEC",
-			"bumpMap": "5A2A01DB-6AF0-4AD9-84CB-EEF17060C471",
-			"bumpScale": 1,
-			"specularMap": "D62D9D3A-E893-4BEE-BA9E-8D28490851CA",
-			"envMap": "6A14E34D-35BA-4AB1-BAF0-8C665059DEC2",
-			"reflectivity": 1,
 			"shading": 1,
 			"transparent": true,
 			"depthTest": true,
@@ -193,11 +187,6 @@
 			"specular": 1118481,
 			"shininess": 30,
 			"map": "445CBA3A-65B1-4276-9B34-F818384E42E0",
-			"alphaMap": "711BBF6F-FE66-4E63-A732-FFB0F808FFEC",
-			"bumpMap": "5A2A01DB-6AF0-4AD9-84CB-EEF17060C471",
-			"bumpScale": 1,
-			"envMap": "6A14E34D-35BA-4AB1-BAF0-8C665059DEC2",
-			"reflectivity": 0.1,
 			"shading": 1,
 			"depthTest": true,
 			"depthWrite": true
@@ -238,58 +227,6 @@
 			"image": "4C3D4EF5-6AE6-4FA5-B5F8-6AE330346645"
 		},
 		{
-			"uuid": "711BBF6F-FE66-4E63-A732-FFB0F808FFEC",
-			"name": "",
-			"mapping": 300,
-			"repeat": [1,1],
-			"offset": [0,0],
-			"wrap": [1000,1000],
-			"minFilter": 1008,
-			"magFilter": 1006,
-			"anisotropy": 1,
-			"sourceFile": "Alpha_MAP.jpg",
-			"image": "02E442CA-541D-43C2-86DD-6A47055E5B93"
-		},
-		{
-			"uuid": "5A2A01DB-6AF0-4AD9-84CB-EEF17060C471",
-			"name": "",
-			"mapping": 300,
-			"repeat": [1,1],
-			"offset": [0,0],
-			"wrap": [1000,1000],
-			"minFilter": 1008,
-			"magFilter": 1006,
-			"anisotropy": 1,
-			"sourceFile": "Bump_map.jpg",
-			"image": "0C3B52B1-1A6C-4ABF-B31F-34F7923ACFE9"
-		},
-		{
-			"uuid": "D62D9D3A-E893-4BEE-BA9E-8D28490851CA",
-			"name": "",
-			"mapping": 300,
-			"repeat": [1,1],
-			"offset": [0,0],
-			"wrap": [1000,1000],
-			"minFilter": 1008,
-			"magFilter": 1006,
-			"anisotropy": 1,
-			"sourceFile": "Specular.jpg",
-			"image": "76EF429D-594C-4009-9A07-40AA8619340D"
-		},
-		{
-			"uuid": "6A14E34D-35BA-4AB1-BAF0-8C665059DEC2",
-			"name": "",
-			"mapping": 305,
-			"repeat": [1,1],
-			"offset": [0,0],
-			"wrap": [1000,1000],
-			"minFilter": 1008,
-			"magFilter": 1006,
-			"anisotropy": 1,
-			"sourceFile": "ENV_MAP.jpg",
-			"image": "ECC5B048-A5F6-4ADA-ACD1-2044434F5FAB"
-		},
-		{
 			"uuid": "23301FCF-9217-4154-8382-47A0B9BF2D05",
 			"name": "",
 			"mapping": 300,
@@ -319,22 +256,6 @@
 		{
 			"uuid": "4C3D4EF5-6AE6-4FA5-B5F8-6AE330346645",
 			"url": "map/Diffuse.jpg"
-		},
-		{
-			"uuid": "02E442CA-541D-43C2-86DD-6A47055E5B93",
-			"url": "alpha/Alpha_MAP.jpg"
-		},
-		{
-			"uuid": "0C3B52B1-1A6C-4ABF-B31F-34F7923ACFE9",
-			"url": "bump/Bump_map.jpg"
-		},
-		{
-			"uuid": "76EF429D-594C-4009-9A07-40AA8619340D",
-			"url": "specular/Specular.jpg"
-		},
-		{
-			"uuid": "ECC5B048-A5F6-4ADA-ACD1-2044434F5FAB",
-			"url": "env/ENV_MAP.jpg"
 		},
 		{
 			"uuid": "7F00532A-18A1-451F-838D-B048F7705807",

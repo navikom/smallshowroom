@@ -32,29 +32,33 @@ Showroom.prototype = {
         var scope = this;
 
         var loader = new THREE.XHRLoader();
-        if(this.options.data[0])
-        loader.load(this.options.data[0], function (json) {
+        if(this.options.data[0]){
+            var path = (isMobile() ? this.options.data[0] + '_mob' : this.options.data[0]) + '.json';
+            loader.load(path, function (json) {
 
-            var loader = new THREE.ObjectLoader();
-            loader.setTexturePath(scope.options.texturePath);
-            loader.setCrossOrigin('');
-            loader.parse(JSON.parse(json), function (result) {
-                scope.scene.add(result);
-                removeTransparent(result);
-                fillObjects(result);
-                scope.start();
+                var loader = new THREE.ObjectLoader();
+                loader.setTexturePath(scope.options.texturePath);
+                loader.setCrossOrigin('');
+                loader.parse(JSON.parse(json), function (result) {
+                    scope.scene.add(result);
+                    removeTransparent(result);
+                    fillObjects(result);
+                    scope.start();
 
-            });
-            if (scope.options.data[1])
-                loader.load(scope.options.data[1], function (result) {
-                    scope.lamp = result;
-                    scope.lamp.scale.set(3,3,3);
-                    scope.initLights();
-                    addWire();
-                    scope.requestRender();
                 });
+                if (scope.options.data[1]){
+                    var path = (isMobile() ? scope.options.data[1] + '_mob' : scope.options.data[1]) + '.json';
+                    loader.load(path, function (result) {
+                        scope.lamp = result;
+                        scope.lamp.scale.set(3,3,3);
+                        scope.initLights();
+                        addWire();
+                        scope.requestRender();
+                    });
+                }
+            });
+        }
 
-        });
 
         this.setCollisionObjects();
 
@@ -78,11 +82,50 @@ Showroom.prototype = {
         }
 
         function addWire(){
-            var wire = new THREE.GridHelper(4400, 100, 0x888888, 0x888888);
+            var wire = new THREE.GridHelper(3400, 100, 0x888888, 0x888888);
             wire.material.linewidth = 1.5;
+            wire.position.y = 570;
             scope.scene.add( wire );
         }
 
+        loader.manager.onStart = function(){
+            scope.switchSpinner( true );
+        };
+
+        loader.manager.onLoad = function (  ){
+            scope.switchSpinner( false );
+        };
+
+        var spinnerData = this.options.spinner.data;
+        loader.manager.onProgress = function( url, loaded, total ){
+            if(url.indexOf('data') == -1){
+                var maxLength = 15;
+                var u = url.split('/');
+                var name = u[u.length - 1];
+                name = scope.aspect.width < 380 && name.length > maxLength
+                    ? '..' + name.substr(name.length - maxLength , name.length - (name.length - maxLength)) : name;
+                spinnerData.innerHTML = Math.round(loaded / total * 100) + '%' + '  ' + name;
+            }
+        };
+
+    },
+
+    switchSpinner: function( on ){
+        var wrapper = this.options.spinner.wrapper;
+        var spinner = this.options.spinner.spinner;
+        var progressData = this.options.spinner.data;
+
+        if( on ) {
+            wrapper.style.display = 'block';
+            var width = spinner.offsetHeight;
+            wrapper.style.top = ((this.aspect.height - width) / 2) + 'px';
+            wrapper.style.left = ((this.aspect.width - width) / 2) + 'px';
+            progressData.style.width = (this.aspect.width / 2 * 0.95) + 'px';
+            spinner.classList.add( 'fa-spin' );
+        } else {
+            wrapper.style.display = 'none';
+            wrapper.classList.remove( 'fa-spin' );
+        }
     },
 
     setCollisionObjects: function(){
@@ -95,25 +138,25 @@ Showroom.prototype = {
 
         createWall(
             this.options.borders.x * 2,
-            new THREE.Vector3(0, 0, this.options.borders.z),
+            new THREE.Vector3(0, 1000, this.options.borders.z),
             new THREE.Euler()
         );
 
         createWall(
             this.options.borders.x * 2,
-            new THREE.Vector3(0, 0, -this.options.borders.z),
+            new THREE.Vector3(0, 1000, -this.options.borders.z),
             new THREE.Euler()
         );
 
         createWall(
             this.options.borders.z * 2,
-            new THREE.Vector3(this.options.borders.x, 0, 0),
+            new THREE.Vector3(this.options.borders.x, 1000, 0),
             new THREE.Euler(0, Math.PI / 2, 0 )
         );
 
         createWall(
             this.options.borders.z * 2,
-            new THREE.Vector3(-this.options.borders.x, 0, 0),
+            new THREE.Vector3(-this.options.borders.x, 1000, 0),
             new THREE.Euler(0, Math.PI / 2, 0 )
         );
 
@@ -167,6 +210,7 @@ Showroom.prototype = {
     initContainer: function () {
         this.container = this.options.container;
         this.updateAspect();
+        this.switchSpinner( true );
     },
 
     initCamera: function () {
@@ -180,10 +224,10 @@ Showroom.prototype = {
 
         this.controls = new THREE.PointerLockControls(
             this.camera,
-            new THREE.Vector3(-3500, this.options.userHeight, 3400));
+            new THREE.Vector3(-2500, this.options.userHeight, 2400),
+            this.container
+        );
         this.scene.add(this.controls.getObject());
-
-
 
         if(this.options.pointerlock){
             this.pointerLockControls();

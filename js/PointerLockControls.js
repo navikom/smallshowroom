@@ -2,7 +2,7 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-THREE.PointerLockControls = function ( camera, position ) {
+THREE.PointerLockControls = function ( camera, position, container ) {
 
 	var scope = this;
 
@@ -58,6 +58,7 @@ THREE.PointerLockControls = function ( camera, position ) {
 			pitchObject.rotation.x += movementY * 0.002;
 			pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 		}
+
 		lastPt = {x: event.touches[0].pageX, y: event.touches[0].pageY};
 
 	};
@@ -72,13 +73,13 @@ THREE.PointerLockControls = function ( camera, position ) {
 
 	this.dispose = function() {
 
-		document.removeEventListener( 'mousemove', onMouseMove, false );
-		document.removeEventListener( 'touchmove', onTouchMove, false );
+		container.removeEventListener( 'mousemove', onMouseMove, false );
+		container.removeEventListener( 'touchmove', onTouchMove, false );
 	};
 
-	document.addEventListener( 'mousemove', onMouseMove, false );
+	container.addEventListener( 'mousemove', onMouseMove, false );
 	document.addEventListener( 'mouseup', onEnd, false );
-	document.addEventListener( 'touchmove', onTouchMove, false );
+	container.addEventListener( 'touchmove', onTouchMove, false );
 	document.addEventListener( 'touchend', onEnd, false);
 
 	this.enabled = false;

@@ -126,6 +126,43 @@
             font-size: 18px;
             overflow-y: auto;
         }
+
+        #annotationContent ul {
+            max-height: 200px;
+        }
+        #spinner-wrapper {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #3d3d3d;
+            opacity: 0.9;
+        }
+
+        #spinner-data {
+            background-color: #dadada;
+            border-bottom-left-radius: 25px;
+            border-top-left-radius: 25px;
+            left: 37%;
+            line-height: 50px;
+            position: absolute;
+            padding-left: 14px;
+            top: 69px;
+            vertical-align: middle;
+            width: 220px;
+
+        }
+
+        .progress-cog {
+            font-size: 12em;
+            color: #dadada;
+            opacity: 0.8;
+        }
+
+        .fa-spin {
+            -webkit-animation:spin 4s linear infinite;
+            -moz-animation:spin 4s linear infinite;
+            animation:spin 4s linear infinite;
+        }
         @-webkit-keyframes show{
             from {
                 -webkit-transform: scale(0);
@@ -142,6 +179,9 @@
                 -webkit-transform: scale(0);
             }
         }
+        @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+        @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+        @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
     </style>
 
 </head>
@@ -177,20 +217,27 @@
             <i class="icon-arrow-right"></i>
         </div>
     </div>
+    <div id="spinner-wrapper">
+        <div id="spinner" class="fa-spin">
+            <i id="spinner-cog" class="icon-fi-widget progress-cog"></i>
+        </div>
 
+        <span id="spinner-data"></span>
+
+    </div>
 </div>
 
 <script>
 
     var showroom = new Showroom({
         container: document.getElementById('showroom'),
-        data: ['room.json', 'lamp.json'],
+        data: ['room', 'lamp'],
         texturePath: 'textures/',
         pointerlock: false,
         speed: 9000,
-        userHeight: 1500,
-        borders: {x: 3800, z: 3500},
-        lights: {intensity: .7, distance: 12000, height: 3400, width:1800},
+        userHeight: 1800,
+        borders: {x: 2800, z: 2500},
+        lights: {intensity: .7, distance: 10000, height: 3400, width:1000},
         buttons: {
             forward: document.getElementById('forward'),
             backward: document.getElementById('backward'),
@@ -201,6 +248,11 @@
             wrapper: document.getElementById('annotation'),
             title: document.getElementById('annotationTitle'),
             content: document.getElementById('annotationContent')
+        },
+        spinner: {
+            wrapper: document.getElementById('spinner-wrapper'),
+            spinner: document.getElementById('spinner'),
+            data: document.getElementById('spinner-data')
         }
     });
 
