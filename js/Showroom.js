@@ -82,7 +82,7 @@ Showroom.prototype = {
         }
 
         function addWire(){
-            var wire = new THREE.GridHelper(3400, 100, 0x888888, 0x888888);
+            var wire = new THREE.GridHelper(3050, 100, 0x888888, 0x888888);
             wire.material.linewidth = 1.5;
             wire.position.y = 570;
             scope.scene.add( wire );
