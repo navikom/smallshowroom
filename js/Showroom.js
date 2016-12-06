@@ -224,7 +224,7 @@ Showroom.prototype = {
 
         this.controls = new THREE.PointerLockControls(
             this.camera,
-            new THREE.Vector3(-2500, this.options.userHeight, 2400),
+            new THREE.Vector3(-2729, this.options.userHeight, 2197),
             this.container
         );
         this.scene.add(this.controls.getObject());
@@ -635,6 +635,7 @@ Showroom.prototype = {
                 this.controls.getObject().translateX(this.velocity.x * delta);
                 this.controls.getObject().translateY(this.velocity.y * delta);
                 this.controls.getObject().translateZ(this.velocity.z * delta);
+                console.log(this.controls.getObject().position)
             }
 
 
