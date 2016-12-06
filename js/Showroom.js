@@ -635,7 +635,6 @@ Showroom.prototype = {
                 this.controls.getObject().translateX(this.velocity.x * delta);
                 this.controls.getObject().translateY(this.velocity.y * delta);
                 this.controls.getObject().translateZ(this.velocity.z * delta);
-                console.log(this.controls.getObject().position)
             }
 
 
