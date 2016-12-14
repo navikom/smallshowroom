@@ -679,9 +679,22 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
         var annot = viewer.options.annotation;
         var rect = container.getBoundingClientRect();
         var ul = annot.content.children[0];
+        var margin = 0;
 
         if(annot.title)
             annot.title.innerHTML = data.title;
+
+        if(annot.content.children[0] && annot.content.children[0].tagName === 'P'){
+            annot.content.removeChild( annot.content.children[0] );
+        }
+
+        if(data.description){
+            var p = document.createElement('p');
+            p.innerHTML = data.description;
+            p.style.marginLeft = '22px';
+            annot.content.insertBefore(p, annot.content.firstChild);
+            margin += 5;
+        }
 
         if(!annot.ul){
             var ul = document.createElement('ul');
@@ -699,6 +712,8 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
         if(!annot.cache){
             annot.cache = {};
         }
+
+        annot.ul.style.marginLeft = margin + 'px';
 
         for (var key in data.content){
             if(!annot.cache[key]){
@@ -730,7 +745,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
         ul.style.maxHeight = (height - 200 - rect.top) + 'px';
 
         var top = rect.top + (windowHeight - annot.wrapper.offsetHeight) / 2;
-        console.log(height, rect.top)
         annot.wrapper.style.top = Math.max(5, top) + 'px';
 
         var offset = (rect.width - Math.min(width, annot.wrapper.offsetWidth)) / 2;

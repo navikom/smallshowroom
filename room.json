@@ -561,8 +561,9 @@
                                           "event": "data",
                                           "data":{
                                               "title": "Floors",
+                                               "description": "Two types of isolated working floors available:",
                                             "content": {
-                                                "Spring tension cable floors – best from an acoustic standpoint:": [],
+                                                "Spring tension cable floors – best from an acoustic standpoint": [],
                                                 "Grated floors – designed to support concentrated loads; installed in sections; can be removed during testing":[]
                                             }
 
