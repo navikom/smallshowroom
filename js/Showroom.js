@@ -32,65 +32,40 @@ Showroom.prototype = {
         var scope = this;
 
         var loader = new THREE.XHRLoader();
-        if(this.options.data[0])
-        loader.load(this.options.data[0], function (json) {
+        if(this.options.data[0]){
+            var path = (isMobile() ? this.options.data[0] + '_mob' : this.options.data[0]) + '.json';
+            loader.load(path, function (json) {
 
-            var loader = new THREE.ObjectLoader();
-            loader.setTexturePath(scope.options.texturePath);
-            loader.setCrossOrigin('');
-            loader.parse(JSON.parse(json), function (result) {
-                scope.scene.add(result);
-                removeTransparent(result);
-                fillObjects(result);
-                scope.start();
-
-            });
-            if (scope.options.data[1])
-                loader.load(scope.options.data[1], function (result) {
-                    scope.lamp = result;
-                    scope.initLights();
-                    scope.requestRender();
-                });
-
-            if (scope.options.data[2])
-                loader.load(scope.options.data[2], function (result) {
-                    result.scale.set(0.7, 0.7, 0.7);
+                var loader = new THREE.ObjectLoader();
+                loader.setTexturePath(scope.options.texturePath);
+                loader.setCrossOrigin('');
+                loader.parse(JSON.parse(json), function (result) {
                     scope.scene.add(result);
-                    scope.requestRender();
+                    removeTransparent(result);
+                    fillObjects(result);
+                    scope.start();
+
                 });
-
-        });
-
-        function onProgress(progress) {
-
-            console.log('Loaded:', progress.loaded, ' total:', progress.total);
+                if (scope.options.data[1]){
+                    var path = (isMobile() ? scope.options.data[1] + '_mob' : scope.options.data[1]) + '.json';
+                    loader.load(path, function (result) {
+                        scope.lamp = result;
+                        scope.lamp.scale.set(3,3,3);
+                        scope.initLights();
+                        addWire();
+                        scope.requestRender();
+                    });
+                }
+            });
         }
 
-        //if (scope.options.data[2] && scope.options.data[2].indexOf('.mtl') > -1) {
-        //    var mtlLoader = new THREE.MTLLoader();
-        //    mtlLoader.setTexturePath(this.options.texturePath);
-        //    mtlLoader.load(this.options.data[2], function (materials) {
-        //        materials.preload();
-        //        var objLoader = new THREE.OBJLoader();
-        //        objLoader.setMaterials(materials);
-        //        objLoader.load(scope.options.data[3], function (object) {
-        //            //object.scale.set(9, 9, 9);
-        //            //object.rotation.x = -Math.PI / 2;
-        //            scope.scene.add(object);
-        //
-        //            scope.requestRender();
-        //
-        //        }, onProgress);
-        //    });
-        //
-        //}
 
         this.setCollisionObjects();
 
         function removeTransparent(obj) {
             obj.traverse(function (child) {
                 if (child.material
-                    && ['A9995B5C-C85E-4FCC-AA29-E05A4AA7BB0D', '8FB3DF1D-C188-4390-B6E9-A5A0D7A75D67'].indexOf(child.material.uuid) > -1
+                    && ['1159E14C-9496-4D83-A669-1355E1E141EE', '8FB3DF1D-C188-4390-B6E9-A5A0D7A75D67'].indexOf(child.material.uuid) > -1
                     && child.material.transparent) {
                     child.material.transparent = false;
                     child.material.needsUpdate = true;
@@ -106,37 +81,82 @@ Showroom.prototype = {
             });
         }
 
+        function addWire(){
+            var wire = new THREE.GridHelper(3050, 100, 0x888888, 0x888888);
+            wire.material.linewidth = 1.5;
+            wire.position.y = 570;
+            scope.scene.add( wire );
+        }
+
+        loader.manager.onStart = function(){
+            scope.switchSpinner( true );
+        };
+
+        loader.manager.onLoad = function (  ){
+            scope.switchSpinner( false );
+        };
+
+        var spinnerData = this.options.spinner.data;
+        loader.manager.onProgress = function( url, loaded, total ){
+            if(url.indexOf('data') == -1){
+                var maxLength = 15;
+                var u = url.split('/');
+                var name = u[u.length - 1];
+                name = scope.aspect.width < 380 && name.length > maxLength
+                    ? '..' + name.substr(name.length - maxLength , name.length - (name.length - maxLength)) : name;
+                spinnerData.innerHTML = Math.round(loaded / total * 100) + '%' + '  ' + name;
+            }
+        };
+
+    },
+
+    switchSpinner: function( on ){
+        var wrapper = this.options.spinner.wrapper;
+        var spinner = this.options.spinner.spinner;
+        var progressData = this.options.spinner.data;
+
+        if( on ) {
+            wrapper.style.display = 'block';
+            var width = spinner.offsetHeight;
+            wrapper.style.top = ((this.aspect.height - width) / 2) + 'px';
+            wrapper.style.left = ((this.aspect.width - width) / 2) + 'px';
+            progressData.style.width = (this.aspect.width / 2 * 0.95) + 'px';
+            spinner.classList.add( 'fa-spin' );
+        } else {
+            wrapper.style.display = 'none';
+            wrapper.classList.remove( 'fa-spin' );
+        }
     },
 
     setCollisionObjects: function(){
         var scope = this;
-        this.carBody = new THREE.Mesh(new THREE.CubeGeometry(1700, 3000, 3900),
+        this.seat = new THREE.Mesh(new THREE.CubeGeometry(1300, 3000, 850),
             new THREE.MeshBasicMaterial({color: 0xCC7407}));
-        this.carBody.position.y = 300;
-        this.carBody.visible = false;
-        this.scene.add(this.carBody);
+        this.seat.position.set(0, 300, 0);
+        this.seat.visible = false;
+        this.scene.add(this.seat);
 
         createWall(
             this.options.borders.x * 2,
-            new THREE.Vector3(0, 0, this.options.borders.z),
+            new THREE.Vector3(0, 1000, this.options.borders.z),
             new THREE.Euler()
         );
 
         createWall(
             this.options.borders.x * 2,
-            new THREE.Vector3(0, 0, -this.options.borders.z),
+            new THREE.Vector3(0, 1000, -this.options.borders.z),
             new THREE.Euler()
         );
 
         createWall(
             this.options.borders.z * 2,
-            new THREE.Vector3(this.options.borders.x, 0, 0),
+            new THREE.Vector3(this.options.borders.x, 1000, 0),
             new THREE.Euler(0, Math.PI / 2, 0 )
         );
 
         createWall(
             this.options.borders.z * 2,
-            new THREE.Vector3(-this.options.borders.x, 0, 0),
+            new THREE.Vector3(-this.options.borders.x, 1000, 0),
             new THREE.Euler(0, Math.PI / 2, 0 )
         );
 
@@ -169,13 +189,16 @@ Showroom.prototype = {
 
             var pointLight = new THREE.PointLight(color, scope.options.lights.intensity, scope.options.lights.distance);
 
-            var geometry = new THREE.SphereGeometry(70, 12, 6);
+            var geometry = new THREE.CircleGeometry(115, 128);
             var material = new THREE.MeshBasicMaterial({color: 0xffffff});
             var sphere = new THREE.Mesh(geometry, material);
+            sphere.rotation.x = Math.PI / 2;
             pointLight.add(sphere);
 
             var lamp = scope.lamp.clone();
-            lamp.position.y = 50;
+            lamp.position.y = -10;
+            lamp.position.x = -24;
+
             pointLight.add(lamp);
 
             pointLight.position.copy(position);
@@ -187,6 +210,7 @@ Showroom.prototype = {
     initContainer: function () {
         this.container = this.options.container;
         this.updateAspect();
+        this.switchSpinner( true );
     },
 
     initCamera: function () {
@@ -200,7 +224,9 @@ Showroom.prototype = {
 
         this.controls = new THREE.PointerLockControls(
             this.camera,
-            new THREE.Vector3(-2000, this.options.userHeight, -2000));
+            new THREE.Vector3(-2729, this.options.userHeight, 2197),
+            this.container
+        );
         this.scene.add(this.controls.getObject());
 
         if(this.options.pointerlock){
@@ -210,7 +236,7 @@ Showroom.prototype = {
         }
 
         var onKeyDown = function (event) {
-
+            if( scope.hasMovement()) return;
             switch (event.keyCode) {
 
                 case scope.keys.UP:
@@ -222,11 +248,9 @@ Showroom.prototype = {
 
                 case scope.keys.LEFT:
                 case scope.keys.A:
-                    if(scope.options.pointerlock){
-                        scope.move.left = true;
-                        scope.controlsEnabled = true;
-                        scope.controls.enabled = true;
-                    }
+                    scope.move.left = true;
+                    scope.controlsEnabled = true;
+                    scope.controls.enabled = true;
 
                     break;
                 case scope.keys.DOWN:
@@ -238,11 +262,9 @@ Showroom.prototype = {
 
                 case scope.keys.RIGHT:
                 case scope.keys.D:
-                    if(scope.options.pointerlock){
-                        scope.move.right = true;
-                        scope.controlsEnabled = true;
-                        scope.controls.enabled = true;
-                    }
+                    scope.move.right = true;
+                    scope.controlsEnabled = true;
+                    scope.controls.enabled = true;
 
                     break;
 
@@ -252,6 +274,7 @@ Showroom.prototype = {
                     break;
 
             }
+            scope.selectButton();
 
         };
 
@@ -288,16 +311,38 @@ Showroom.prototype = {
                     break;
 
             }
-
+            scope.selectButton();
         };
 
         document.addEventListener('keydown', onKeyDown, false);
         document.addEventListener('keyup', onKeyUp, false);
 
-        if( isMobile()){
-            this.buttonControls();
-        }
+        this.buttonControls();
 
+    },
+
+    hasMovement: function(){
+        var scope = this;
+        var has = false;
+        ['forward', 'backward', 'left', 'right'].map(function(name){
+            if(scope.move[name]){
+                has = true;
+                return false;
+            }
+        });
+
+        return has;
+    },
+
+    selectButton: function( ){
+        var scope = this;
+        ['forward', 'backward', 'left', 'right'].map(function(name){
+            if(scope.move[name]){
+                scope.options.buttons[name].classList.add( 'selected' );
+            } else {
+                scope.options.buttons[name].classList.remove( 'selected');
+            }
+        });
     },
 
     buttonControls: function(){
@@ -305,50 +350,40 @@ Showroom.prototype = {
         var scope = this;
         var forward = this.options.buttons.forward;
         var backward = this.options.buttons.backward;
-        forward.style.display = 'block';
-        backward.style.display = 'block';
+        var left = this.options.buttons.left;
+        var right = this.options.buttons.right;
 
-        function onTouchStartForward( event ) {
-            if(scope.move.backward) return;
-            scope.move.forward = true;
+        function onStart( object, endEventName ){
+            var key = object.key;
+            if( scope.hasMovement()) return;
+            scope.move[key] = true;
             scope.controlsEnabled = true;
             scope.controls.enabled = true;
-            forward.style.backgroundColor = 'blue';
-            forward.addEventListener( 'touchend', onTouchEndForward, false );
-
+            scope.selectButton();
+            object.elem.addEventListener( endEventName, onEnd.bind( this, object, endEventName), false );
         }
 
-        function onTouchEndForward( event ) {
-            scope.move.forward = false;
+        function onEnd( object, endEventName ){
+            scope.move[object.key] = false;
             scope.controlsEnabled = false;
             scope.controls.enabled = false;
-            forward.style.backgroundColor = '#fff8dc';
-            forward.removeEventListener( 'touchend', onTouchEndForward, false );
-
+            scope.selectButton();
+            object.elem.removeEventListener( endEventName, onEnd.bind( this, object, endEventName), false );
         }
 
-        function onTouchStartBackward( event ) {
-            if(scope.move.forward) return;
-            scope.move.backward = true;
-            scope.controlsEnabled = true;
-            scope.controls.enabled = true;
-            backward.style.backgroundColor = 'blue';
-            backward.addEventListener( 'touchend', onTouchEndBackward, false );
 
-        }
+        [{elem: forward, key: 'forward'}, {elem: backward, key: 'backward'}, {elem: left, key: 'left'}, {elem: right, key: 'right'}]
+            .map(function(object){
+                if(isMobile()){
+                    addListener( object.elem, 'touchstart', onStart.bind( this, object, 'touchend' ), false );
+                } else {
+                    addListener( object.elem, 'mousedown', onStart.bind( this, object, 'mouseup' ), false );
+                }
 
-        function onTouchEndBackward( event ) {
-            scope.move.backward = false;
-            scope.controlsEnabled = false;
-            scope.controls.enabled = false;
-            backward.style.backgroundColor = '#fff8dc';
-            backward.removeEventListener( 'touchend', onTouchEndBackward, false );
+            });
 
-        }
-
-        forward.addEventListener( 'touchstart', onTouchStartForward, false );
-        backward.addEventListener( 'touchstart', onTouchStartBackward, false );
     },
+
 
     mouseControls: function(){
         var scope = this;
@@ -446,6 +481,9 @@ Showroom.prototype = {
     },
 
     updateAspect: function () {
+        var wrapper = document.getElementById('container');
+        this.container.style.maxWidth = wrapper.style.maxWidth = Math.min(this.container.clientWidth, window.innerWidth) + 'px';
+        this.container.style.maxHeight = wrapper.style.maxHeight = Math.min(this.container.clientHeight, window.innerHeight) + 'px';
         this.aspect = {
             width: this.container.clientWidth,
             height: this.container.clientHeight
@@ -470,7 +508,7 @@ Showroom.prototype = {
         this.container.appendChild(this.renderer.domElement);
 
         this.updateCameraAspect();
-
+        this.render();
     },
 
     start: function () {
@@ -588,7 +626,7 @@ Showroom.prototype = {
                 this.velocity.x -= this.options.speed * delta;
                 moveAction = true;
             }
-            if (this.move.right && inBorders(new THREE.Vector3(0, 0, 1), this.velocity.x + this.options.speed * delta)) {
+            if (this.move.right && inBorders(new THREE.Vector3(1, 0, 0), this.velocity.x + this.options.speed * delta)) {
                 this.velocity.x += this.options.speed * delta;
                 moveAction = true;
             }
@@ -629,7 +667,7 @@ Showroom.prototype = {
                 }
             }
 
-            collisions = caster.intersectObjects([scope.carBody]);
+            collisions = caster.intersectObjects([scope.seat]);
 
             if(collisions.length > 0 && collisions[0].distance < distance){
                 return false;

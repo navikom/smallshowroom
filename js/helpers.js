@@ -25,6 +25,33 @@ function extend ( obj ) {
     return obj;
 }
 
+var _eventHandlers = {};
+
+function addListener ( node, event, handler, capture ) {
+    if ( !(node in _eventHandlers) ) {
+        _eventHandlers[ node ] = {};
+    }
+    if ( !(event in _eventHandlers[ node ]) ) {
+        _eventHandlers[ node ][ event ] = [];
+    }
+
+    _eventHandlers[ node ][ event ].push( [ handler, capture ] );
+    node.addEventListener( event, handler, capture );
+}
+
+function removeAllListeners ( node, event ) {
+    if ( node in _eventHandlers ) {
+        var handlers = _eventHandlers[ node ];
+        if ( event in handlers ) {
+            var eventHandlers = handlers[ event ];
+            for ( var i = eventHandlers.length; i--; ) {
+                var handler = eventHandlers[ i ];
+                node.removeEventListener( event, handler[ 0 ], handler[ 1 ] );
+            }
+        }
+    }
+}
+
 function isMobile() {
     if( navigator.userAgent.match(/Android/i)
         || navigator.userAgent.match(/webOS/i)
@@ -159,34 +186,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
     viewer.objectsLookAtCamera = objectsLookAtCamera;
 
-
-    var _eventHandlers = {};
-
-    function addListener ( node, event, handler, capture ) {
-        if ( !(node in _eventHandlers) ) {
-            _eventHandlers[ node ] = {};
-        }
-        if ( !(event in _eventHandlers[ node ]) ) {
-            _eventHandlers[ node ][ event ] = [];
-        }
-
-        _eventHandlers[ node ][ event ].push( [ handler, capture ] );
-        node.addEventListener( event, handler, capture );
-    }
-
-    function removeAllListeners ( node, event ) {
-        if ( node in _eventHandlers ) {
-            var handlers = _eventHandlers[ node ];
-            if ( event in handlers ) {
-                var eventHandlers = handlers[ event ];
-                for ( var i = eventHandlers.length; i--; ) {
-                    var handler = eventHandlers[ i ];
-                    node.removeEventListener( event, handler[ 0 ], handler[ 1 ] );
-                }
-            }
-        }
-    }
-
     traverse( mainScene, mainObjects );
 
 
@@ -295,21 +294,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
     }
 
-
-    function onControlsChanged () {
-
-        if ( objectsLookAtCamera.length == 0 ) return;
-
-        for ( var i = 0; i < objectsLookAtCamera.length; i++ ) {
-
-            if ( objectsLookAtCamera[ i ].lookAtCamera )
-                objectsLookAtCamera[ i ].lookAt( mainCamera.position );
-
-        }
-
-    }
-
-
     // events
 
     function onClick ( frame, event ) {
@@ -321,7 +305,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
 
     }
-
 
     function onTouchEnd ( frame, event ) {
 
@@ -348,8 +331,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
     addListener( container, 'click', onClick.bind( this, frame ), false );
     addListener( container, 'touchstart', onTouchEnd.bind( this, frame ), false );
     addListener( container, 'mousemove', onMouseMove.bind( this, frame ), false );
-
-
 
     function checkAvailabilityGroups ( object, scene ) {
 
@@ -453,6 +434,8 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
                             applyToggle( obj, object.uuid + i );
                         } else if ( animations[ i ].event === 'reset' ) {
                             applyReset( obj, object.uuid + i );
+                        } else if ( animations[ i ].event === 'data' ) {
+                            applyData( obj, object.uuid + i );
                         } else
                             applyClickAnimation( obj, object.uuid + i );
 
@@ -492,15 +475,6 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
 
             var obj = mainScene.getObjectByProperty( 'name', objName, true );
 
-            if ( !obj ) {
-
-                for ( var i = 0, j = interfaces.length; i < j; i++ ) {
-                    obj = interfaces[ i ].scene.getObjectByProperty( 'name', objName, true );
-                    if ( obj != undefined )
-                        break;
-                }
-
-            }
             objects.push( obj );
 
         } )
@@ -697,6 +671,89 @@ THREE.AnimationsHelper = function ( viewer, callback ) {
     function applyToggle ( object, uuid ) {
 
         object.userData.animations.disabled = object.userData.click[ uuid ].disabled;
+    }
+
+    function applyData( object, uuid ){
+
+        var data = object.userData.click[ uuid].data;
+        var annot = viewer.options.annotation;
+        var rect = container.getBoundingClientRect();
+        var ul = annot.content.children[0];
+        var margin = 0;
+
+        if(annot.title)
+            annot.title.innerHTML = data.title;
+
+        if(annot.content.children[0] && annot.content.children[0].tagName === 'P'){
+            annot.content.removeChild( annot.content.children[0] );
+        }
+
+        if(data.description){
+            var p = document.createElement('p');
+            p.innerHTML = data.description;
+            p.style.marginLeft = '22px';
+            annot.content.insertBefore(p, annot.content.firstChild);
+            margin += 5;
+        }
+
+        if(!annot.ul){
+            var ul = document.createElement('ul');
+            annot.content.appendChild(ul);
+            annot.ul = ul;
+        }
+
+        var fc = annot.ul.firstChild;
+
+        while( fc ) {
+            annot.ul.removeChild( fc );
+            fc = annot.ul.firstChild;
+        }
+
+        if(!annot.cache){
+            annot.cache = {};
+        }
+
+        annot.ul.style.marginLeft = margin + 'px';
+
+        for (var key in data.content){
+            if(!annot.cache[key]){
+                var li = document.createElement('li');
+                var p = document.createElement('p');
+                p.innerHTML = key;
+                li.appendChild(p);
+                if(data.content[key].length > 0){
+                    for (var i = 0; i < data.content[key].length; i++){
+                        var text = data.content[key][i];
+                        var p = document.createElement('p');
+                        p.innerHTML = text;
+                        li.appendChild(p);
+                    }
+                }
+                annot.cache[key] = li;
+            }
+
+            annot.ul.appendChild(annot.cache[key]);
+
+        }
+
+
+        var windowHeight = Math.min(window.innerHeight, rect.height);
+        var height = windowHeight;
+
+        var width = rect.width * 0.7;
+        annot.wrapper.style.maxWidth = width + 'px';
+        ul.style.maxHeight = (height - 200 - rect.top) + 'px';
+
+        var top = rect.top + (windowHeight - annot.wrapper.offsetHeight) / 2;
+        annot.wrapper.style.top = Math.max(5, top) + 'px';
+
+        var offset = (rect.width - Math.min(width, annot.wrapper.offsetWidth)) / 2;
+        annot.wrapper.style.left = offset  + 'px';
+
+        annot.wrapper.style.zIndex = 999;
+        annot.wrapper.style.opacity = 1;
+        annot.wrapper.style.animationName = "show";
+
     }
 
     function applyReset ( object, uuid ) {

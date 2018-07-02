@@ -4,13 +4,17 @@
     <title>Showroom</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <script src="js/three.min.js"></script>
+    <link rel="stylesheet" id="css-bootstrap" href="fonts/style.css">
+    <script src="js/three.js"></script>
     <script src="js/PointerLockControls.js"></script>
     <script src="js/helpers.js"></script>
     <script src="js/Showroom.js"></script>
 
     <style>
 
+        p {
+            margin: 5px;
+        }
         #instructions {
 
             position: absolute;
@@ -45,28 +49,139 @@
         #container {
             width:800px;
             margin:auto;
+            position: relative;
         }
 
         #showroom {
             width:800px;
             height:600px;
         }
-        #forward {
+        .buttons {
             position: absolute;
-            left: 15px;
             bottom: 15px;
-            height: 35px;
-            display: none;
-            background-color: #fff8dc;
+            width: 215px;
+            right: 0;
+
         }
-        #backward {
+        .arrow-btn {
+            float: left;
+            width: 40px;
+            height: 40px;
+            padding: 10px 3px 0 10px;
+            margin-left: 5px;
+            color: #dadada;
+            font-size: 34px;
+            border: solid 4px #dadada;
+        }
+
+        .up {
+            margin: 0 70px 5px;
+        }
+
+        .selected {
+            box-shadow: 1px 1px 10px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .arrow-btn:hover {
+            color: #ececec;
+            border-color: #ececec;
+            cursor: pointer;
+        }
+
+        #annotation {
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
+            color: #FFF;
+            opacity: 0;
+            max-width: 600px;
+            padding: 7px;
             position: absolute;
-            right: 15px;
-            bottom: 15px;
-            height: 35px;
-            display: none;
-            background-color: #fff8dc;
+            -webkit-animation-duration: 1s;
+            z-index: -999;
         }
+        #annotationTitle {
+            margin-left: 30px;
+        }
+
+        #annotationClose {
+            position: absolute;
+            right: 10px;
+            top: 10px
+        }
+        .annotation-wrapper {
+            position: relative;
+            background: rgba(255, 253, 244, 0.8);
+            border-radius: 6px;
+            color: #3d3d3d;
+            padding: 7px;
+            overflow: hidden;
+            word-wrap:break-word;
+            height: 90%;
+            float:left;
+        }
+        #annotationContent{
+            font-size: 18px;
+            overflow-y: auto;
+        }
+
+        #annotationContent ul {
+            max-height: 200px;
+        }
+        #spinner-wrapper {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #3d3d3d;
+            opacity: 0.9;
+        }
+
+        #spinner-data {
+            background-color: #dadada;
+            border-bottom-left-radius: 25px;
+            border-top-left-radius: 25px;
+            left: 37%;
+            line-height: 50px;
+            position: absolute;
+            padding-left: 14px;
+            top: 69px;
+            vertical-align: middle;
+            width: 220px;
+            display:none;
+        }
+
+        .progress-cog {
+            font-size: 12em;
+            color: #dadada;
+            opacity: 0.8;
+        }
+
+        .fa-spin {
+            -webkit-animation:spin 4s linear infinite;
+            -moz-animation:spin 4s linear infinite;
+            animation:spin 4s linear infinite;
+        }
+        @-webkit-keyframes show{
+            from {
+                -webkit-transform: scale(0);
+            }
+            to {
+                -webkit-transform: scale(1);
+            }
+        }
+        @-webkit-keyframes hide{
+            from {
+                -webkit-transform: scale(1);
+            }
+            to {
+                -webkit-transform: scale(0);
+            }
+        }
+        @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+        @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+        @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
     </style>
 
 </head>
@@ -74,6 +189,13 @@
 
 <div id="container">
     <div id="showroom"></div>
+    <div id="annotation">
+        <div class="annotation-wrapper">
+            <h1 id="annotationTitle"></h1>
+            <div id="annotationContent"></div>
+            <img src="error.svg" id="annotationClose" width="20px"/>
+        </div>
+    </div>
     <div id="blocker">
         <div id="instructions">
             <!-- <span style="font-size:40px">Controls</span>
@@ -81,24 +203,69 @@
             <span id="instructionsText">(SPACE = on/off, W, A, S, D, Up, Left, Right, Down = Move, MOUSE = Look around)</span> -->
         </div>
     </div>
-    <button id="forward">forward</button>
-    <button id="backward">backward</button>
+    <div class="buttons">
+        <div id="forward" class="arrow-btn up">
+            <i class="icon-arrow-up"></i>
+        </div>
+        <div id="left" class="arrow-btn">
+            <i class="icon-arrow-left"></i>
+        </div>
+        <div id="backward" class="arrow-btn">
+            <i class="icon-arrow-down"></i>
+        </div>
+        <div id="right" class="arrow-btn">
+            <i class="icon-arrow-right"></i>
+        </div>
+    </div>
+    <div id="spinner-wrapper">
+        <div id="spinner" class="fa-spin">
+            <i id="spinner-cog" class="icon-fi-widget progress-cog"></i>
+        </div>
+
+        <span id="spinner-data"></span>
+
+    </div>
 </div>
 
 <script>
 
-    new Showroom({
+    var showroom = new Showroom({
         container: document.getElementById('showroom'),
-        data: [],
+        data: ['room', 'lamp'],
         texturePath: 'textures/',
-        carTexturePath: 'textures/volvo/',
         pointerlock: false,
         speed: 9000,
-        userHeight: 1000,
-        borders: {x: 4000, z: 4400},
-        lights: {intensity: .7, distance: 12000, height: 3900, width:2000},
-        buttons: {forward: document.getElementById('forward'), backward: document.getElementById('backward')}
-    })
+        userHeight: 1800,
+        borders: {x: 2800, z: 2500},
+        lights: {intensity: .7, distance: 10000, height: 3400, width:1000},
+        buttons: {
+            forward: document.getElementById('forward'),
+            backward: document.getElementById('backward'),
+            left: document.getElementById('left'),
+            right: document.getElementById('right')
+        },
+        annotation: {
+            wrapper: document.getElementById('annotation'),
+            title: document.getElementById('annotationTitle'),
+            content: document.getElementById('annotationContent')
+        },
+        spinner: {
+            wrapper: document.getElementById('spinner-wrapper'),
+            spinner: document.getElementById('spinner'),
+            data: document.getElementById('spinner-data')
+        }
+    });
+
+    var close = document.getElementById('annotationClose');
+    close.addEventListener('click', clickEvent, false);
+
+    close.addEventListener( 'touchstart', clickEvent, false);
+
+    function clickEvent(){
+        showroom.options.annotation.wrapper.style.opacity = 0;
+        showroom.options.annotation.wrapper.style.animationName = "hide";
+        showroom.options.annotation.wrapper.style.zIndex = -999;
+    }
 
 </script>
 

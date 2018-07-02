@@ -2,7 +2,7 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-THREE.PointerLockControls = function ( camera, position ) {
+THREE.PointerLockControls = function ( camera, position, container ) {
 
 	var scope = this;
 
@@ -10,27 +10,36 @@ THREE.PointerLockControls = function ( camera, position ) {
 
 	var pitchObject = new THREE.Object3D();
 	pitchObject.add( camera );
-	pitchObject.rotation.x = -0.24;
+	pitchObject.rotation.x = -0.13;
 
 	var yawObject = new THREE.Object3D();
 	yawObject.position.copy(position);
 	yawObject.add( pitchObject );
-	yawObject.rotation.y = -Math.PI;
+	yawObject.rotation.y = -0.68;
 
 	var PI_2 = Math.PI / 2;
 	var lastPt = null;
 
 	var onMouseMove = function ( event ) {
 
+
 		if ( scope.enabled === false ) return;
 
 		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
+		if(navigator.userAgent.match(/Safari/i) && lastPt != null){
+			movementX = event.pageX - lastPt.x;
+			movementY = event.pageY - lastPt.y;
+		}
+
 		yawObject.rotation.y += movementX * 0.002;
 		pitchObject.rotation.x += movementY * 0.002;
 
 		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+
+		lastPt = {x: event.pageX, y: event.pageY};
+		
 	};
 
 
@@ -49,11 +58,12 @@ THREE.PointerLockControls = function ( camera, position ) {
 			pitchObject.rotation.x += movementY * 0.002;
 			pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 		}
+
 		lastPt = {x: event.touches[0].pageX, y: event.touches[0].pageY};
 
 	};
 
-	var onTouchEnd = function ( event ) {
+	var onEnd = function ( event ) {
 
 		event.preventDefault();
 		event.stopPropagation();
@@ -63,13 +73,14 @@ THREE.PointerLockControls = function ( camera, position ) {
 
 	this.dispose = function() {
 
-		document.removeEventListener( 'mousemove', onMouseMove, false );
-		document.removeEventListener( 'touchmove', onTouchMove, false );
+		container.removeEventListener( 'mousemove', onMouseMove, false );
+		container.removeEventListener( 'touchmove', onTouchMove, false );
 	};
 
-	document.addEventListener( 'mousemove', onMouseMove, false );
-	document.addEventListener( 'touchmove', onTouchMove, false );
-	document.addEventListener( 'touchend', onTouchEnd, false);
+	container.addEventListener( 'mousemove', onMouseMove, false );
+	document.addEventListener( 'mouseup', onEnd, false );
+	container.addEventListener( 'touchmove', onTouchMove, false );
+	document.addEventListener( 'touchend', onEnd, false);
 
 	this.enabled = false;
 
